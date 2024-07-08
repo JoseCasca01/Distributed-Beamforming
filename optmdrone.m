@@ -18,7 +18,7 @@ function [valsignal, BSoptm, Roptm] = optmdrone(fieldx,fieldy,group,f,c,N,lambda
     for i = 1:divx
         for j = 1:divy
 
-            BS = [BSx(i) BSy(j) 20*lambda];
+            BS = [BSx(i) BSy(j) 2*(10*lambda)^2/lambda];
 
             R = distance(group,BS);
 

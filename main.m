@@ -2,14 +2,14 @@ close all;
 clear;
 clc;
 
-f = 3e9; % 3 GHz
+f = 6e9; % 6 GHz
 c = 3e8;
-lambda = c/f;
+lambda = c/f; 
 flag = true;
 
 while flag
     N = input('Number of nodes: ');
-    if mod(N,1)==0
+    if (mod(N,1)==0) && (N > 0)
         flag = false; 
     end
 end
@@ -19,7 +19,8 @@ fieldx = 10*lambda; %0 to fieldx
 fieldy = 10*lambda; %0 to fieldy
 
 %Base station coordinates
-BS = [fieldx/2,fieldy/2,20*lambda]; %center with z = 5
+BS = [fieldx/2,fieldy/2,2*fieldx^2/lambda]; %FarField
+%BS = [fieldx/2,fieldy/2,20*lambda];
 if BS(3) < 1
     BS(3) = 1;
 elseif BS(3)>10
@@ -49,14 +50,12 @@ xlabel('xfield (m)');
 legend('Base Station', 'Nodes');
 axis([0, fieldy, 0, fieldx]);
 
-%% Receção sem erro na posição
+%% Absolute position known
 R = distance(sensorsPos,BS);
 val = receptor(R,f,c,N,lambda,1);
+%% Gaussian Error in sensors' position
 
-%% Receção com erro gaussiano na posição dos sensores
-%Quando não são apresentadas figuras é apresentada a média da diferença de
-%potência da posição ideal para a posição com erro
-figures = 1; %0 para não ver as figures / 1 para ver figuras
+figures = 1; %0 do not plot graphs / 1 plot graphs
 R = distance(sensorsPos,BS);
 if figures ~= 0
     receptor_SensorposError(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,0.2*lambda,figures);
@@ -68,10 +67,9 @@ else
     disp(mean(val));
 end
 
-%% Receção com erro gaussiano na posição do recetor
-%Quando não são apresentadas figuras é apresentada a média da diferença de
-%potência da posição ideal para a posição com erro
-figures = 1; %0 para não ver as figures / 1 para ver figuras
+%% Gaussian Error in Base Station's (BS) position
+
+figures = 1; %0 do not plot graphs / 1 plot graphs
 R = distance(sensorsPos,BS);
 
 if figures ~= 0
@@ -84,8 +82,8 @@ else
     disp(mean(val));
 end
 
-%% Signal Amplitude Ideal vs Sensors Erro
-k=1;
+%% Ideal Signal Amplitude vs Sensors' position Erro
+z=1;
 
 R = distance(sensorsPos,BS);
 
@@ -114,25 +112,25 @@ for m = 1:1
     ylabel('Normalized received signal power');
     title('Received signal normalized by ideal signal');
     for i=6:7:7*length(variance)-1
-        Median_x(k) = sum(get(hd(i),'XData'))/2;
-        Median_y(k) = sum(get(hd(i),'YData'))/2;
-        k=k+1;
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
     end
     plot(Median_x,Median_y);
     legend('Average');
 end
 
-%% Signal Amplitude Ideal vs BS Erro
+%% Ideal Signal Amplitude vs BS position Error
 clear variance
 clear valnormalized
 
-k=1;
+z=1;
 
 R = distance(sensorsPos,BS);
 
 val = receptor(R,f,c,N,lambda,0);
 
-rounds = 1000;
+rounds = 500;
 
 %variance1(1,:) = 0.025:0.05:3;
 %variance2(1,:) = 3.025:0.05:6;
@@ -160,26 +158,26 @@ for m = 1:1
     ylabel('Normalized received signal power');
     title('Received signal normalized by ideal signal');
     for i=6:7:7*length(variance)-1
-        Median_x(k) = sum(get(hd(i),'XData'))/2;
-        Median_y(k) = sum(get(hd(i),'YData'))/2;
-        k=k+1;
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
     end
     plot(Median_x,Median_y);
     legend('Average');
 end
 
-%% Array Factor Ideal vs Sensors Erro
+%% Ideal Array Factor vs Sensors' position Error
 clear variance
 clear valnormalized
     
-k = 1;
+z = 1;
 
 R = distance(sensorsPos,BS);
 
-AFIdeal = N; %Com a posição ideal o AF é igual ao número de sensores
+AFIdeal = N; %Array Factor (AF) for correct positions
 
 rounds = 300;
-variance = 0.025:0.025:0.5;
+variance = 0.05:0.025:0.5;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
 
@@ -187,8 +185,7 @@ for m = 1:1
     AFtest = zeros(rounds,length(variance));
     for i = 1:length(variance)
         for j = 1:rounds*m
-            [~, grouperror] = receptor_SensorposError(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
-            Rerror = distance(grouperror,BS);
+            [~, Rerror] = receptor_SensorposError(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
             AFtest(j,i) = sum(exp(1j*2*pi/lambda*(R-Rerror)));
         end
     end
@@ -201,27 +198,27 @@ for m = 1:1
     ylabel('Normalized Array Factor');
     title('Array Factor normalized by ideal signal')
     for i=6:7:7*length(variance)-1
-        Median_x(k) = sum(get(hd(i),'XData'))/2;
-        Median_y(k) = sum(get(hd(i),'YData'))/2;
-        k=k+1;
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
     end
     plot(Median_x,Median_y);
     legend('Average');
 end
 
-%% Array Factor Ideal vs BS Erro
-k = 1;
+%% Ideal Array Factor vs BS position Error
+z = 1;
 
 R = distance(sensorsPos,BS);
 
-AFIdeal = N; %Com a posição ideal o AF é igual ao número de sensores
+AFIdeal = N; %AF for correct positions
 
-rounds = 1000;
+rounds = 500;
 %variance1(1,:) = 0.025:0.05:3;
 %variance2(1,:) = 3.025:0.05:6;
 %variance3(1,:) = 0.025:0.05:0.75;
 %variance4(1,:) = 2:0.2:3;
-variance = 3.025:0.05:6;
+variance = 0.025:0.05:3;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
 
@@ -242,18 +239,21 @@ for m = 1:1
     ylabel('Normalized Array Factor');
     title('Array Factor normalized by ideal Array Factor')
     for i=6:7:7*length(variance)-1
-        Median_x(k) = sum(get(hd(i),'XData'))/2;
-        Median_y(k) = sum(get(hd(i),'YData'))/2;
-        k=k+1;
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
     end
     plot(Median_x,Median_y);
     legend('Average');
 end
 
-%% Ponto ótimo do drone
+%% Drone or BS optimum position 
+% Until here drone was located in the center of the field. Now we will be
+% located at the optimum position in every simulation
+
 close all;
 
-[val,BSoptm,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
+[val,BS,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
 
 %x = 0:fieldx/25:fieldx;
 %y = fieldy:-fieldy/25:0;
@@ -264,13 +264,13 @@ colorMap = jet(256);
 colormap(colorMap);
 colorbar;
 
-%%
-k = 1;
+%% Ideal Signal Amplitude vs BS position Error
+z=1;
 
-
-AFIdeal = N; %Com a posição ideal o AF é igual ao número de sensores
+val = receptor(R,f,c,N,lambda,0);
 
 rounds = 1000;
+
 %variance1(1,:) = 0.025:0.05:3;
 %variance2(1,:) = 3.025:0.05:6;
 %variance3(1,:) = 0.025:0.05:0.75;
@@ -278,15 +278,110 @@ rounds = 1000;
 variance = 0.025:0.05:3;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
+valtests = zeros(rounds,length(variance));
+  
+for m = 1:1
+    for i = 1:length(variance)
+        for j = 1:rounds
+            [valtests(j,i),~] = receptor_BSposError(fieldx,fieldy,BSoptm,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
+        end
+    end
+
+
+    valnormalized = valtests/val;
+
+    figure;
+    hd = boxplot(valnormalized,variance);
+    hold on;
+    xlabel('Variance (wavelength)');
+    ylabel('Normalized received signal power');
+    title('Received signal normalized by ideal signal');
+    for i=6:7:7*length(variance)-1
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
+    end
+    plot(Median_x,Median_y);
+    legend('Average');
+end
+
+%% Ideal Array Factor vs BS and sensors' position Error
+z=1;
+
+mode = 0;
+
+rounds = 600;
+
+[~,BS,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
+
+%x = 0:fieldx/25:fieldx;
+%y = fieldy:-fieldy/25:0;
+
+%figure;
+%imagesc(val/max(max(val)))
+%colorMap = jet(256);
+%colormap(colorMap);
+%colorbar;
+
+z = 1;
+
+clear val;
+
+val = receptor(R,f,c,N,lambda,0);
+
+
+variance = 0.025:0.025:0.5;
+Median_y =  zeros(1,length(variance));
+Median_x = zeros(1,length(variance));
+valtests = zeros(rounds,length(variance));
+  
+for m = 1:1
+    for i = 1:length(variance)
+        for j = 1:rounds
+            [valtests(j,i),~] = Systemerror(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,mode);
+        end
+    end
+
+
+    valnormalized = valtests/val;
+
+    figure;
+    hd = boxplot(valnormalized,variance);
+    hold on;
+    xlabel('Variance (wavelength)');
+    ylabel('Normalized received signal power');
+    title('Received signal normalized by ideal signal');
+    for i=6:7:7*length(variance)-1
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
+    end
+    plot(Median_x,Median_y);
+    legend('Average');
+end
+
+%% Ideal Array Factor vs BS and sensors' position Error
+mode = 0;
+
+z = 1;
+
+AFIdeal = N;
+
+rounds = 600;
+
+variance = 0.025:0.025:0.5;
+Median_y =  zeros(1,length(variance));
+Median_x = zeros(1,length(variance));
+valtests = zeros(rounds,length(variance));
 
 for m = 1:1
-    AFtest = zeros(rounds,length(variance));
     for i = 1:length(variance)
-        for j = 1:rounds*m
-            [~, Rerror] = receptor_BSposError(fieldx,fieldy,BSoptm,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
+        for j = 1:rounds
+            [~,Rerror] = Systemerror(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,mode);
             AFtest(j,i) = sum(exp(1j*2*pi/lambda*(R-Rerror)));
         end
     end
+    
     AFnormalized = abs(AFtest/AFIdeal);
 
     figure;
@@ -294,11 +389,92 @@ for m = 1:1
     hold on;
     xlabel('Variance (wavelength)');
     ylabel('Normalized Array Factor');
-    title('Array Factor normalized by ideal Array Factor')
+    title('Array Factor normalized by ideal Array Factor');
     for i=6:7:7*length(variance)-1
-        Median_x(k) = sum(get(hd(i),'XData'))/2;
-        Median_y(k) = sum(get(hd(i),'YData'))/2;
-        k=k+1;
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
+    end
+    plot(Median_x,Median_y);
+    legend('Average');
+end
+
+%% Signal Adjust
+receptorAdjust(R,f,c,N,lambda,1);
+
+%% Ideal Signal Amplitude vs Sensors' position Erro (Amplitude Adjust)
+z=1;
+
+R = distance(sensorsPos,BS);
+
+%val = receptor(R,f,c,N,lambda,0);
+val = receptorAdjust(R,f,c,N,lambda,0);
+
+rounds = 500;
+variance = 0.05:0.025:0.5;
+Median_y =  zeros(1,length(variance));
+Median_x = zeros(1,length(variance));
+valtests = zeros(rounds,length(variance));
+
+for m = 1:1
+    for i = 1:length(variance)
+        for j = 1:rounds*m
+            valtests(j,i) = receptor_SensorposErrorAmpAdjust(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
+        end
+    end
+
+
+    valnormalized = valtests/val;
+
+    figure;
+    hd = boxplot(valnormalized,variance);
+    hold on;
+    xlabel('Variance (wavelength)');
+    ylabel('Normalized received signal power');
+    title('Received signal normalized by ideal signal');
+    for i=6:7:7*length(variance)-1
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
+    end
+    plot(Median_x,Median_y);
+    legend('Average');
+end
+
+%% Ideal Signal Amplitude vs BS' position Erro (Amplitude Adjust)
+z=1;
+
+R = distance(sensorsPos,BS);
+
+val = receptor(R,f,c,N,lambda,0);
+%val = receptorAdjust(R,f,c,N,lambda,0);
+
+rounds = 500;
+variance = 0.025:0.05:3;
+Median_y =  zeros(1,length(variance));
+Median_x = zeros(1,length(variance));
+valtests = zeros(rounds,length(variance));
+
+for m = 1:1
+    for i = 1:length(variance)
+        for j = 1:rounds*m
+            valtests(j,i) = receptor_BSposErrorAmpAdjust(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
+        end
+    end
+
+
+    valnormalized = valtests/val;
+
+    figure;
+    hd = boxplot(valnormalized,variance);
+    hold on;
+    xlabel('Variance (wavelength)');
+    ylabel('Normalized received signal power');
+    title('Received signal normalized by ideal signal');
+    for i=6:7:7*length(variance)-1
+        Median_x(z) = sum(get(hd(i),'XData'))/2;
+        Median_y(z) = sum(get(hd(i),'YData'))/2;
+        z=z+1;
     end
     plot(Median_x,Median_y);
     legend('Average');
