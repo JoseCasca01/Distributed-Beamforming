@@ -5,7 +5,7 @@ function [newsignals,newsignals_Loss, receivedsignal, receivedsignal_Loss] = adj
 
     for i = 1:N
         newsignals(i,t>trav_time(i)) = signals(i,1:end-length(t(t<=trav_time(i))));
-        newsignals_Loss(i,:) = newsignals(i,:) / PropagationLoss(i);
+        newsignals_Loss(i,:) = newsignals(i,:) / sqrt(PropagationLoss(i));
     end
     
     receivedsignal = sum(newsignals);

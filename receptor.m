@@ -12,8 +12,8 @@ function [val] = receptor(R,f,c,N,lambda,mode)
     %signals = ones(N,length(t));
     signals = zeros(N,length(t));
     for i = 1:N
-        %signals(i,:) = cos(2*pi*f*t-phase(i));
-        signals(i,:) = cos(2*pi*f*t);
+        signals(i,:) = cos(2*pi*f*t-phase(i));
+        %signals(i,:) = cos(2*pi*f*t);
         %AF = AF + exp(1j*2*pi*(-R(i))/lambda);
     end
     
@@ -38,8 +38,7 @@ function [val] = receptor(R,f,c,N,lambda,mode)
     if mode == 1
         figure(2);
         plot(1:N,PropagationLoss,'-X');
-        title('Propagation Loss per sensor')
-        ylabel('P_R');
+        ylabel('Attenuation');
         xlabel('Sensor number');
         
         figure(3);
@@ -47,26 +46,28 @@ function [val] = receptor(R,f,c,N,lambda,mode)
         title('Received Signals');
         xlabel('t(s)');
         ylabel('Amplitude');
-        
+        axis([3.332e-8 3.338e-8 min(min(adjustsignals))*0.99 max(max(adjustsignals))*1.01]);
+
         figure(4);
         plot(t,receivedsignal);
         title('Received Signal');
         xlabel('t(s)');
         ylabel('Amplitude');
-        axis([0 max(t)*1.01 min(receivedsignal)-1 max(receivedsignal)+1]);
+        axis([3.32e-8 3.38e-8 min(receivedsignal)*0.99 max(receivedsignal)*1.01]);
         
         figure(5);
         plot(t,adjustsignals_Loss);
         title('Received Signals with Losses');
         xlabel('t(s)');
         ylabel('Amplitude');
-        
+        axis([3.332e-8 3.338e-8 min(min(adjustsignals_Loss))*0.99 max(max(adjustsignals_Loss))*1.01]);
+
         figure(6);
         plot(t,receivedsignal_Loss);
         title('Received Signal with Losses');
         xlabel('t(s)');
         ylabel('Amplitude');
-        axis([0 max(t)*1.01 min(receivedsignal_Loss)*1.01 max(receivedsignal_Loss)*1.01]);
+        axis([3.32e-8 3.38e-8 min(receivedsignal_Loss)*0.99 max(receivedsignal_Loss)*1.01]);
 
         %figure(7);
         %plot(tstem,receivedsignal(t == tstem));

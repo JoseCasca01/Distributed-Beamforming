@@ -90,7 +90,7 @@ R = distance(sensorsPos,BS);
 val = receptor(R,f,c,N,lambda,0);
 
 rounds = 300;
-variance = 0.05:0.025:0.5;
+variance = 0.025:0.025:0.5;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
 valtests = zeros(rounds,length(variance));
@@ -109,14 +109,13 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -136,7 +135,7 @@ rounds = 500;
 %variance2(1,:) = 3.025:0.05:6;
 %variance3(1,:) = 0.025:0.05:0.75;
 %variance4(1,:) = 2:0.2:3;
-variance = 3.025:0.05:6;
+variance = 3.025:0.05:4;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
 valtests = zeros(rounds,length(variance));
@@ -155,17 +154,22 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
+%%
+h=gco;
+set(h,'XTick',1:4:60);
+set(h,'XTickLabel',variance(1:4:60));
+grid on;
+% 0.835069444444445,0.898115397425656,0.069791666666667,0.027090694935218
 %% Ideal Array Factor vs Sensors' position Error
 clear variance
 clear valnormalized
@@ -196,13 +200,12 @@ for m = 1:1
     hold on;
     xlabel('Variance (wavelength)');
     ylabel('Normalized Array Factor');
-    title('Array Factor normalized by ideal signal')
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -237,13 +240,12 @@ for m = 1:1
     hold on;
     xlabel('Variance (wavelength)');
     ylabel('Normalized Array Factor');
-    title('Array Factor normalized by ideal Array Factor')
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -251,13 +253,13 @@ end
 % Until here drone was located in the center of the field. Now we will be
 % located at the optimum position in every simulation
 
-close all;
+%close all;
 
 [val,BS,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
 
 %x = 0:fieldx/25:fieldx;
 %y = fieldy:-fieldy/25:0;
-
+%%
 figure;
 imagesc(val/max(max(val)))
 colorMap = jet(256);
@@ -275,7 +277,7 @@ rounds = 1000;
 %variance2(1,:) = 3.025:0.05:6;
 %variance3(1,:) = 0.025:0.05:0.75;
 %variance4(1,:) = 2:0.2:3;
-variance = 0.025:0.05:3;
+variance = 3.025:0.05:4;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
 valtests = zeros(rounds,length(variance));
@@ -283,7 +285,7 @@ valtests = zeros(rounds,length(variance));
 for m = 1:1
     for i = 1:length(variance)
         for j = 1:rounds
-            [valtests(j,i),~] = receptor_BSposError(fieldx,fieldy,BSoptm,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
+            [valtests(j,i),~] = receptor_BSposError(fieldx,fieldy,BS,R,sensorsPos,f,c,N,lambda,variance(i)*lambda,0);
         end
     end
 
@@ -294,14 +296,13 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -312,7 +313,7 @@ mode = 0;
 
 rounds = 600;
 
-[~,BS,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
+[val,BS,R] = optmdrone(fieldx,fieldy,sensorsPos,f,c,N,lambda,25,25);
 
 %x = 0:fieldx/25:fieldx;
 %y = fieldy:-fieldy/25:0;
@@ -349,14 +350,13 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -389,13 +389,12 @@ for m = 1:1
     hold on;
     xlabel('Variance (wavelength)');
     ylabel('Normalized Array Factor');
-    title('Array Factor normalized by ideal Array Factor');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -407,8 +406,8 @@ z=1;
 
 R = distance(sensorsPos,BS);
 
-%val = receptor(R,f,c,N,lambda,0);
-val = receptorAdjust(R,f,c,N,lambda,0);
+val = receptor(R,f,c,N,lambda,0);
+%val = receptorAdjust(R,f,c,N,lambda,0);
 
 rounds = 500;
 variance = 0.05:0.025:0.5;
@@ -430,14 +429,13 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end
 
@@ -446,8 +444,8 @@ z=1;
 
 R = distance(sensorsPos,BS);
 
-val = receptor(R,f,c,N,lambda,0);
-%val = receptorAdjust(R,f,c,N,lambda,0);
+%val = receptor(R,f,c,N,lambda,0);
+val = receptorAdjust(R,f,c,N,lambda,0);
 
 rounds = 500;
 variance = 0.025:0.05:3;
@@ -469,13 +467,12 @@ for m = 1:1
     hd = boxplot(valnormalized,variance);
     hold on;
     xlabel('Variance (wavelength)');
-    ylabel('Normalized received signal power');
-    title('Received signal normalized by ideal signal');
+    ylabel('Normalized received signal amplitude');
     for i=6:7:7*length(variance)-1
         Median_x(z) = sum(get(hd(i),'XData'))/2;
         Median_y(z) = sum(get(hd(i),'YData'))/2;
         z=z+1;
     end
-    plot(Median_x,Median_y);
+    plot(Median_x,Median_y,'LineWidth',3,'Color',[1.00,0.41,0.16]);
     legend('Average');
 end

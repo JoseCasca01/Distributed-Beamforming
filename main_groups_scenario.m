@@ -104,14 +104,14 @@ figure;
 for i = 1:5
     plot(t,adjustsignals(1+20*(i-1):20+20*(i-1),:),cor(i)),hold on;
 end
-title('Received Signals');
+%title('Received Signals');
 xlabel('t(s)');
 ylabel('Amplitude');
 axis([3.46e-8 3.50e-8 -1 1]);
 
 figure;
 plot(t,receivedsignal_Loss),hold on;
-title('Received Signal');
+%title('Received Signal');
 xlabel('t(s)');
 ylabel('Amplitude');
 axis([3.32e-8 3.50e-8 min(receivedsignal_Loss) max(receivedsignal_Loss)]);
