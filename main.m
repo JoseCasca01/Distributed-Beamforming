@@ -89,7 +89,7 @@ R = distance(sensorsPos,BS);
 
 val = receptor(R,f,c,N,lambda,0);
 
-rounds = 300;
+rounds = 5;
 variance = 0.025:0.025:0.5;
 Median_y =  zeros(1,length(variance));
 Median_x = zeros(1,length(variance));
